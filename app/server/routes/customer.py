@@ -16,4 +16,11 @@ from app.server.models.customer import (
     UpdateCustomerModel
 )
 
+@router.post('/', response_description = "Customer data added to the database")
+async def add_customer(customer: CustomerSchema = Body(...)):
+    customer = jsonable_encoder(customer)
+    new_customer = await add_customer(customer)
+    return ResponseModel(new_customer, "Customer added successfully")
+
+
 router = APIRouter()
