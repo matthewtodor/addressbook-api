@@ -17,7 +17,11 @@ from app.server.models.customer import (
     UpdateCustomerModel
 )
 
-id_reg = r"/^#?([a-f0-9]{24})$/"
+id_reg = re.compile(r"/^#([a-f0-9]{24})$/")
+def checking():
+    print(re.match(id_reg, "64488d30aa18333c35a58efb"))
+
+checking()
 
 router = APIRouter()
 
@@ -36,13 +40,13 @@ async def get_customers():
 
 @router.get("/{id}" , response_description="Customer data successfully retrieved")
 async def get_customer_data(id:str):
-    if re.match(id_reg, id):
+    # if re.match(id_reg, id):
         customer = await retrieve_customer_by_id(id)
         if customer:
             return ResponseModel(customer, "Customer data retrieved successfully")
         return ErrorResponseModel("Error:", 404, "Customer doesn't exist")
     
-    return ErrorResponseModel("Error:", 503, "The provided id ({}) is not valid".format(id))
+    # return ErrorResponseModel("Error:", 503, "The provided id ({}) is not valid".format(id))
 
 @router.put("/{id}")
 async def update_customer_data(id:str, req:UpdateCustomerModel=Body(...)):
