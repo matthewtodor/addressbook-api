@@ -10,4 +10,4 @@ app.include_router(CustomerRouter, tags=["Customer"], prefix="/customer")
 
 @app.get("/", tags=["Root"])
 async def read_root():
-    return {"message": "Welcome to this app!"}
+    return {"message": "Hi Jesse"}
