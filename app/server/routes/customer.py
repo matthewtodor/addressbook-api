@@ -18,11 +18,6 @@ from app.server.models.customer import (
 )
 regex = "^[0-9a-f]{24}+$"
 id_reg = re.compile(regex)
-def checking():
-    print(id_reg)
-    print(re.match(id_reg, "64488d30aa18333c35a58efb"))
-
-checking()
 
 router = APIRouter()
 
@@ -41,13 +36,13 @@ async def get_customers():
 
 @router.get("/{id}" , response_description="Customer data successfully retrieved")
 async def get_customer_data(id:str):
-    # if re.match(id_reg, id):
+    if re.match(id_reg, id):
         customer = await retrieve_customer_by_id(id)
         if customer:
             return ResponseModel(customer, "Customer data retrieved successfully")
         return ErrorResponseModel("Error:", 404, "Customer doesn't exist")
     
-    # return ErrorResponseModel("Error:", 503, "The provided id ({}) is not valid".format(id))
+    return ErrorResponseModel("Error:", 503, "The provided id ({}) is not valid".format(id))
 
 @router.put("/{id}")
 async def update_customer_data(id:str, req:UpdateCustomerModel=Body(...)):
@@ -66,8 +61,8 @@ async def update_customer_data(id:str, req:UpdateCustomerModel=Body(...)):
         )
     return ErrorResponseModel("Error:", 503, "The provided id ({}) is not valid".format(id))
 
-@router.delete("/{id}")
-async def delete_customer(id:str):
+@router.delete("/{id}", response_description="Customer data deleted from the database")
+async def delete_customer_data(id:str):
     if re.match(id_reg, id):
         deleted_customer = await delete_customer(id)
         if deleted_customer:
@@ -75,5 +70,5 @@ async def delete_customer(id:str):
                 "Customer was successfully deleted!",
                 "Customer deletion successful"
             )
-        return ErrorResponseModel("And error occurred", 404, "There was an error deleting the customer data. Please check the information and try again. If this continues, please contact the administrator.")
+        return ErrorResponseModel("An error occurred", 404, "There was an error deleting the customer data. Please check the information and try again. If this continues, please contact the administrator.")
     return ErrorResponseModel("Error:", 503, "The provided id ({}) is not valid".format(id))
