@@ -16,9 +16,10 @@ from app.server.models.customer import (
     CustomerSchema,
     UpdateCustomerModel
 )
-
-id_reg = re.compile(r"/^#([a-f0-9]{24})$/")
+regex = "^[0-9a-f]{24}+$"
+id_reg = re.compile(regex)
 def checking():
+    print(id_reg)
     print(re.match(id_reg, "64488d30aa18333c35a58efb"))
 
 checking()
