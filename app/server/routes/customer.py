@@ -16,6 +16,7 @@ from app.server.models.customer import (
     CustomerSchema,
     UpdateCustomerModel
 )
+
 regex = "^[0-9a-f]{24}+$"
 id_reg = re.compile(regex)
 
