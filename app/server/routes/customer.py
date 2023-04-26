@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Body
 from fastapi.encoders import jsonable_encoder
+import re
 
 
 from app.server.database import (
@@ -16,7 +17,7 @@ from app.server.models.customer import (
     UpdateCustomerModel
 )
 
-
+id_reg = r"/^#?([a-f0-9]{24})$/"
 
 router = APIRouter()
 
@@ -34,10 +35,40 @@ async def get_customers():
     return ResponseModel(customers,"No Customer data found")
 
 @router.get("/{id}" , response_description="Customer data successfully retrieved")
-async def get_customer_data(id):
-    customer = await retrieve_customer_by_id(id)
-    if customer:
-        return ResponseModel(customer, "Customer data retrieved successfully")
-    return ResponseModel("Error:", 404, "Customer doesn't exist")
+async def get_customer_data(id:str):
+    if re.match(id_reg, id):
+        customer = await retrieve_customer_by_id(id)
+        if customer:
+            return ResponseModel(customer, "Customer data retrieved successfully")
+        return ErrorResponseModel("Error:", 404, "Customer doesn't exist")
+    
+    return ErrorResponseModel("Error:", 503, "The provided id ({}) is not valid".format(id))
 
+@router.put("/{id}")
+async def update_customer_data(id:str, req:UpdateCustomerModel=Body(...)):
+    if re.match(id_reg, id):
+        req = {k:v for k, v in req.dict().items() if v is not None}
+        updated_customer = await update_customer(id, req)
+        if updated_customer:
+            return ResponseModel(
+                "Customer with id: {} update is successful".format(id),
+                "Customer updated successfully",
+            )
+        return ErrorResponseModel(
+            "An error occurred",
+            404,
+            "There was an error updating the customer data. Please check the information and try again. If this continues, please contact the administrator."
+        )
+    return ErrorResponseModel("Error:", 503, "The provided id ({}) is not valid".format(id))
 
+@router.delete("/{id}")
+async def delete_customer(id:str):
+    if re.match(id_reg, id):
+        deleted_customer = await delete_customer(id)
+        if deleted_customer:
+            return ResponseModel(
+                "Customer was successfully deleted!",
+                "Customer deletion successful"
+            )
+        return ErrorResponseModel("And error occurred", 404, "There was an error deleting the customer data. Please check the information and try again. If this continues, please contact the administrator.")
+    return ErrorResponseModel("Error:", 503, "The provided id ({}) is not valid".format(id))
